@@ -1,10 +1,10 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "claude-plugins-official",
-  "description": "Directory of popular Claude Code extensions including development tools, productivity plugins, and MCP integrations",
+  "name": "bradmb-plugins",
+  "description": "Fork of Claude Code plugins with Windows PowerShell support for ralph-wiggum and other enhancements",
   "owner": {
-    "name": "Anthropic",
-    "email": "support@anthropic.com"
+    "name": "bradmb",
+    "email": ""
   },
   "plugins": [
     {
