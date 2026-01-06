@@ -24,7 +24,18 @@ This plugin implements Ralph using a **Stop hook** that intercepts Claude's exit
 # 5. Repeat until completion
 ```
 
-The loop happens **inside your current session** - you don't need external bash loops. The Stop hook in `hooks/stop-hook.sh` creates the self-referential feedback loop by blocking normal session exit.
+The loop happens **inside your current session** - you don't need external bash loops. The Stop hook creates the self-referential feedback loop by blocking normal session exit.
+
+## Windows Support
+
+This fork has been modified to run on **Windows using PowerShell**. The hooks and setup scripts use PowerShell instead of bash:
+
+| Component | Script |
+|-----------|--------|
+| Setup Script | `scripts/setup-ralph-loop.ps1` |
+| Stop Hook | `hooks/stop-hook.ps1` |
+
+For the original Unix/macOS bash version, see the [official plugin repository](https://github.com/anthropics/claude-plugins-official).
 
 This creates a **self-referential feedback loop** where:
 - The prompt never changes between iterations
@@ -129,6 +140,16 @@ Always use `--max-iterations` as a safety net to prevent infinite loops on impos
 #  - Document what's blocking progress
 #  - List what was attempted
 #  - Suggest alternative approaches"
+```
+
+### Monitoring the Loop (Windows PowerShell)
+
+```powershell
+# View current iteration:
+Select-String -Path .claude/ralph-loop.local.md -Pattern '^iteration:'
+
+# View full state:
+Get-Content .claude/ralph-loop.local.md -TotalCount 10
 ```
 
 **Note**: The `--completion-promise` uses exact string matching, so you cannot use it for multiple completion conditions (like "SUCCESS" vs "BLOCKED"). Always rely on `--max-iterations` as your primary safety mechanism.
