@@ -153,25 +153,6 @@ if ($CompletionPromise -ne "null" -and ![string]::IsNullOrEmpty($CompletionPromi
 # Not complete - continue loop with SAME PROMPT
 $NextIteration = $Iteration + 1
 
-# Extract prompt (everything after the closing ---)
-if ($Content -match '(?s)^---.*?\n---\s*\n(.*)$') {
-    $PromptText = $Matches[1].Trim()
-} else {
-    Write-Error @"
-⚠️  Ralph loop: State file corrupted or incomplete
-   File: $RalphStateFile
-   Problem: No prompt text found
-
-   This usually means:
-     • State file was manually edited
-     • File was corrupted during writing
-
-   Ralph loop is stopping. Run /ralph-loop again to start fresh.
-"@
-    Remove-Item $RalphStateFile -Force
-    exit 0
-}
-
 # Update iteration in frontmatter
 $UpdatedContent = $Content -replace '(?m)^iteration:\s*\d+', "iteration: $NextIteration"
 $UpdatedContent | Set-Content -Path $RalphStateFile -NoNewline
@@ -183,10 +164,20 @@ if ($CompletionPromise -ne "null" -and ![string]::IsNullOrEmpty($CompletionPromi
     $SystemMsg = "🔄 Ralph iteration $NextIteration | No completion promise set - loop runs infinitely"
 }
 
-# Output JSON to block the stop and feed prompt back
+# Build compact reason that tells Claude to read the file
+# This keeps the payload small to avoid context overflow issues
+$ReasonText = @"
+Continue the Ralph Wiggum loop (iteration $NextIteration).
+
+Read your task instructions from: .claude/ralph-loop.local.md
+
+Work on the task described in that file. When complete, output the completion promise if one is set.
+"@
+
+# Output JSON to block the stop and feed compact instruction back
 $Response = @{
     decision = "block"
-    reason = $PromptText
+    reason = $ReasonText
     systemMessage = $SystemMsg
 } | ConvertTo-Json -Compress
 

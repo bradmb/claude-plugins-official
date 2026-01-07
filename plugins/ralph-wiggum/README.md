@@ -154,6 +154,29 @@ Get-Content .claude/ralph-loop.local.md -TotalCount 10
 
 **Note**: The `--completion-promise` uses exact string matching, so you cannot use it for multiple completion conditions (like "SUCCESS" vs "BLOCKED"). Always rely on `--max-iterations` as your primary safety mechanism.
 
+## Context Management & Compaction
+
+The Ralph Wiggum plugin automatically handles context window management:
+
+### How It Works
+
+1. **Compact Prompt Injection**: During normal iterations, the Stop hook injects a small instruction (~100 chars) telling Claude to read the full task from `.claude/ralph-loop.local.md`. This prevents context overflow when the window is nearly full.
+
+2. **Post-Compaction Recovery**: When auto-compact (or manual `/compact`) occurs, a SessionStart hook automatically re-injects the full Ralph prompt. Since compaction frees up context, the full prompt can be safely injected.
+
+### Benefits
+
+- **No crashes from context overflow** - Prompt payload is always small during normal iterations
+- **Survives compaction** - Loop automatically continues after context is compacted
+- **Iteration preserved** - Iteration count is maintained across compaction events
+
+### Hooks Used
+
+| Hook | File | Purpose |
+|------|------|---------|
+| Stop | `stop-hook.ps1` | Blocks exit, injects compact "read file" instruction |
+| SessionStart (compact) | `post-compact-hook.ps1` | Re-injects full prompt after compaction |
+
 ## Philosophy
 
 Ralph embodies several key principles:

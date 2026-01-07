@@ -1,5 +1,5 @@
 {
-  "description": "Ralph Wiggum plugin stop hook for self-referential loops",
+  "description": "Ralph Wiggum plugin hooks for self-referential loops",
   "hooks": {
     "Stop": [
       {
@@ -7,6 +7,17 @@
           {
             "type": "command",
             "command": "powershell -ExecutionPolicy Bypass -File ${CLAUDE_PLUGIN_ROOT}/hooks/stop-hook.ps1"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -ExecutionPolicy Bypass -File ${CLAUDE_PLUGIN_ROOT}/hooks/post-compact-hook.ps1"
           }
         ]
       }
